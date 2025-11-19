@@ -1,6 +1,85 @@
-MIT License
+TCDS Dual Layer License v1.0
+Copyright (c) 2025
+Autor: Genaro Carrasco Ozuna
+Proyecto: Teoría Cromodinámica Sincrónica (TCDS)
+ORCID: https://orcid.org/0009-0005-6358-9910
+Repositorio: TCDS_Reloj_Causal
 
-Copyright (c) 2025 Genaro Carrasco Ozuna
+───────────────────────────────────────────────────────────────
+I. CAPA ABIERTA (CIENTÍFICA) — CC BY 4.0
+───────────────────────────────────────────────────────────────
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-...
+Este repositorio (código HTML/CSS/JS, JSON-LD, documentación,
+diagramas, texto explicativo y lógica conceptual del Reloj Causal)
+se distribuye bajo la licencia:
+
+Creative Commons Attribution 4.0 International (CC-BY 4.0)
+
+Permite:
+- Copiar, modificar y redistribuir el material.
+- Uso académico, investigativo y documental.
+- Creación de derivados siempre que se cite al autor.
+
+Debe incluirse la cita:
+
+Carrasco Ozuna, G. (2025). Reloj Causal Humano — TCDS. 
+Proyecto TCDS / Motor Sincrónico de Luz. 
+ORCID: 0009-0005-6358-9910.
+
+───────────────────────────────────────────────────────────────
+II. CAPA RESTRINGIDA (TECNOLOGÍAS Σ–FET / HARDWARE / USO COMERCIAL)
+───────────────────────────────────────────────────────────────
+
+Queda explícitamente prohibido, sin autorización escrita del autor:
+
+1. El uso comercial directo o indirecto del Σ-FET, RE-Q, 
+   CSL-H, K-Rate κΣ–A, coherencímetro y cualquier hardware
+   experimental o derivado impreso/ensamblado.
+
+2. Integrar este software con prototipos de hardware,
+   firmware, sensores, OCXO, PLL, filtros de fase o cualquier
+   configuración destinada a ensayos físicos, industriales,
+   biométricos o comerciales.
+
+3. Toda redistribución o sublicenciamiento que incluya:
+   - Dispositivos físicos.
+   - Servicios predictivos comerciales.
+   - Productos que utilicen medición Σ, ΔH, LI, R(t) o κΣ.
+
+4. El uso del término “TCDS”, “Sincronón”, “Σ-FET”, 
+   “Reloj Causal”, “Segundo Coherencial”, “Motor Sincrónico de Luz”,
+   o equivalentes como marca comercial.
+
+Para licenciamiento tecnológico y transferencia:
+Contacto: genarocarrasco.ozuna@gmail.com
+
+───────────────────────────────────────────────────────────────
+III. DESCARGO GENERAL
+───────────────────────────────────────────────────────────────
+
+Este software no provee diagnóstico clínico.
+Es una herramienta de exploración conceptual basada en la TCDS.
+
+───────────────────────────────────────────────────────────────
+IV. CLÁUSULA DE INTEGRIDAD TCDS (Σ-Layer)
+───────────────────────────────────────────────────────────────
+
+Toda modificación, derivación o implementación deberá preservar
+el núcleo conceptual Q–Σ–φ–χ, el filtro E-Veto (ΔH ≤ −0.2),
+la Ley del Balance Coherencial (Q·Σ = φ) y las métricas Σ.
+
+No se permite retirar los metadatos JSON-LD del autor,
+los créditos ni la trazabilidad ORCID/DOI.
+
+───────────────────────────────────────────────────────────────
+V. RESUMEN
+───────────────────────────────────────────────────────────────
+
+• Código y textos → CC-BY 4.0  
+• Hardware, Σ-FET, coherencímetro → Propietario (uso comercial restringido)  
+• Producto final → Licencia dual TCDS v1.0  
+• Contacto para permisos avanzados → genarocarrasco.ozuna@gmail.com
+
+───────────────────────────────────────────────────────────────
+
+FIN DE LA LICENCIA
