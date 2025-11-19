@@ -14,16 +14,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Ajusta esta URL si tu gateway de Vercel usa una ruta distinta
-    const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
+    const upstream = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages,
+        model: "openai/gpt-4.1-mini", // modelo vía Gateway
+        messages
       })
     });
 
