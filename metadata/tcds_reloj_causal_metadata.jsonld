@@ -1,1 +1,29 @@
-
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Reloj Causal Humano — TCDS",
+  "alternateName": "TCDS Causal Clock",
+  "applicationCategory": "ScientificApplication",
+  "operatingSystem": "Any (Web-based)",
+  "author": {
+    "@type": "Person",
+    "name": "Genaro Carrasco Ozuna",
+    "affiliation": "Proyecto TCDS / MSL, México"
+  },
+  "creator": "Genaro Carrasco Ozuna",
+  "description": "Interfaz web experimental basada en la Teoría Cromodinámica Sincrónica (TCDS) para visualizar el tiempo estándar t_M, ajustar un proxy de tiempo causal t_C y consultar un análisis asistido por IA sobre el estado de coherencia Σ vs fricción φ en el usuario.",
+  "keywords": [
+    "TCDS",
+    "Reloj Causal",
+    "Segundo coherencial",
+    "Σ-metrics",
+    "Coherencia",
+    "Empuje cuántico",
+    "CSL-H"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "softwareVersion": "0.1.0",
+  "url": "https://TU_DOMINIO.vercel.app/",
+  "applicationSubCategory": "Coherence metrics / causal time visualization",
+  "isAccessibleForFree": true
+}
