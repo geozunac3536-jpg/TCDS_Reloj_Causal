@@ -1,1 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reloj Causal Humano — TCDS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="Reloj Causal Humano TCDS: visualización de tiempo estándar t_M, tiempo causal t_C y consulta asistida por IA vía Σ-metrics cualitativas.">
+  <meta name="author" content="Genaro Carrasco Ozuna — Teoría Cromodinámica Sincrónica (TCDS)" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23050713' stroke='%2335e0ff' stroke-width='3'/%3E%3Cpath d='M32 10v22l12 8' stroke='%2335e0ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23ff6bff'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #050713;
+      --bg-alt: #0b0f1f;
+      --fg: #f5f7ff;
+      --accent: #35e0ff;
+      --accent2: #ff6bff;
+      --danger: #ff6b6b;
+      --ok: #4ade80;
+      --warn: #f97316;
+      --card-radius: 20px;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+      color: var(--fg);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1080px;
+      padding: 1.2rem;
+      display: grid;
+      grid-template-columns: 1.1fr 1.3fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 880px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(2,6,23,0.96));
+      border-radius: var(--card-radius);
+      padding: 1.2rem;
+      border: 1px solid rgba(148,163,184,0.3);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,0.8),
+        0 18px 40px rgba(15,23,42,0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top left,
+        rgba(53,224,255,0.08),
+        transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    header {
+      margin-bottom: 0.75rem;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 650;
+      letter-spacing: 0.03em;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .title span.sub {
+      font-size: 0.75rem;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      background: rgba(15,23,42,0.9);
+    }
+
+    .clock-face {
+      margin-top: 0.75rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 0.9rem;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .clock-face {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .analog {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 15%, #1f2937, #020617);
+      border: 1px solid rgba(148,163,184,0.7);
+      box-shadow:
+        0 0 25px rgba(53,224,255,0.4),
+        inset 0 0 18px rgba(15,23,42,0.9);
+    }
+
+    .analog-inner {
+      position: absolute;
+      inset: 10%;
+      border-radius: inherit;
+      border: 1px dashed rgba(148,163,184,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .analog-center {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 999px;
+      background: var(--accent2);
+      box-shadow: 0 0 10px rgba(255,107,255,0.9);
+    }
+
+    .hand {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: 50% 100%;
+      transform: translateX(-50%) translateY(-100%) rotate(0deg);
+      border-radius: 999px;
+    }
+
+    .hand.sec {
+      width: 2px;
+      height: 35%;
+      background: var(--accent2);
+      box-shadow: 0 0 8px rgba(255,107,255,0.8);
+    }
+
+    .hand.min {
+      width: 3px;
+      height: 30%;
+      background: var(--accent);
+    }
+
+    .hand.hour {
+      width: 4px;
+      height: 25%;
+      background: #e5e7eb;
+    }
+
+    .clock-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .metric-label {
+      opacity: 0.8;
+    }
+
+    .metric-value {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+    }
+
+    .tag-ok   { color: var(--ok); }
+    .tag-warn { color: var(--warn); }
+    .tag-bad  { color: var(--danger); }
+
+    .slider-block {
+      margin-top: 0.5rem;
+    }
+
+    .slider-label {
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      opacity: 0.85;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .bubble {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.7);
+    }
+
+    /* Panel derecho */
+
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      max-height: 220px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.95);
+      color: var(--fg);
+      padding: 0.6rem 0.7rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    textarea::placeholder {
+      color: rgba(148,163,184,0.9);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.35rem;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: radial-gradient(circle at 20% 0, #38bdf8, #0ea5e9, #0369a1);
+      color: var(--fg);
+      box-shadow: 0 10px 25px rgba(56,189,248,0.45);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+
+    button.secondary {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.8);
+      box-shadow: none;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 6px 14px rgba(56,189,248,0.35);
+      filter: brightness(0.96);
+    }
+
+    button[disabled] {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .status-line {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: var(--danger);
+      box-shadow: 0 0 8px rgba(248,113,113,0.7);
+    }
+
+    .status-dot.ok {
+      background: var(--ok);
+      box-shadow: 0 0 8px rgba(74,222,128,0.7);
+    }
+
+    .status-dot.warn {
+      background: var(--warn);
+      box-shadow: 0 0 8px rgba(249,115,22,0.7);
+    }
+
+    pre {
+      margin: 0.4rem 0 0;
+      padding: 0.6rem 0.7rem;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(51,65,85,0.9);
+      font-size: 0.8rem;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    footer {
+      margin-top: 0.4rem;
+      font-size: 0.7rem;
+      opacity: 0.75;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      justify-content: space-between;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- PANEL IZQUIERDO: RELOJ -->
+    <section class="card">
+      <header>
+        <div class="title-row">
+          <div class="title">
+            Reloj Causal Humano — TCDS
+            <span class="sub">t<sub>M</sub> (tiempo estándar) · t<sub>C</sub> (gradiente de coherencia)</span>
+          </div>
+          <div class="pill">Versión experimento Σ · β</div>
+        </div>
+      </header>
+
+      <div class="clock-face">
+        <div class="analog" id="clock">
+          <div class="analog-inner">
+            <div class="analog-center"></div>
+          </div>
+          <div class="hand hour" id="hand-hour"></div>
+          <div class="hand min" id="hand-min"></div>
+          <div class="hand sec" id="hand-sec"></div>
+        </div>
+
+        <div class="clock-metrics">
+          <div class="metric-row">
+            <div class="metric-label">t<sub>M</sub> (UTC local)</div>
+            <div class="metric-value" id="tm-display">--:--:--</div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">t<sub>C</sub> (proxy cualitativo)</div>
+            <div class="metric-value" id="tc-display">0.000</div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">Estado Σ · lectura rápida</div>
+            <div class="metric-value" id="sigma-state">
+              <span class="tag-warn">φ-driven (baseline)</span>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">Filtro E-Veto (ΔH proxy)</div>
+            <div class="metric-value" id="eveto-state">
+              <span class="tag-warn">ΔH ≈ 0 — sin decisión</span>
+            </div>
+          </div>
+
+          <div class="slider-block">
+            <div class="slider-label">
+              Ajuste subjetivo de coherencia t<sub>C</sub> (-1.0 φ-driven · 0 neutro · +1.0 Q-driven)
+            </div>
+            <div class="slider-row">
+              <input id="tc-slider" type="range" min="-100" max="100" value="0" step="1" />
+              <div class="bubble" id="tc-bubble">0.000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO: IA + TEXTO -->
+    <section class="card panel-right">
+      <header>
+        <h2 style="font-size:1rem; font-weight:600; margin-bottom:0.25rem;">
+          Consulta causal asistida por IA
+        </h2>
+        <p style="font-size:0.8rem; opacity:0.85; margin:0;">
+          Pega hasta ~1000 caracteres describiendo tu estado, entorno o decisión.
+          El sistema enviará un prompt al backend para que la IA genere un diagnóstico
+          cualitativo orientado a <strong>mayor coherencia Σ</strong>.
+        </p>
+      </header>
+
+      <div>
+        <textarea id="user-text" maxlength="1000"
+          placeholder="Ejemplo: Me siento saturado por varias decisiones pendientes. Tengo trabajo acumulado, temas económicos por resolver y quiero saber cómo priorizar sin perder estabilidad emocional ni creatividad.">
+        </textarea>
+
+        <div class="button-row">
+          <button type="button" class="secondary" id="btn-clear">
+            Limpiar
+          </button>
+          <button type="button" id="btn-send">
+            Activar consulta Σ-IA
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="status-line">
+          <span id="status-dot" class="status-dot"></span>
+          <span id="status-text">Backend /api/query no probado todavía.</span>
+        </div>
+        <pre id="response-box">La respuesta de la IA aparecerá aquí en formato de texto causal.</pre>
+      </div>
+
+      <footer>
+        <span>
+          Proyecto: <strong>Teoría Cromodinámica Sincrónica (TCDS)</strong>
+        </span>
+        <span>
+          Autor: Genaro Carrasco Ozuna · ORCID: <a href="https://orcid.org/0009-0005-6358-9910" target="_blank" rel="noreferrer">0009-0005-6358-9910</a>
+        </span>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // === RELOJ ANALÓGICO t_M ===
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      const secDeg = (s / 60) * 360;
+      const minDeg = ((m + s / 60) / 60) * 360;
+      const hourDeg = ((h % 12 + m / 60) / 12) * 360;
+
+      document.getElementById("hand-sec").style.transform =
+        "translateX(-50%) translateY(-100%) rotate(" + secDeg + "deg)";
+      document.getElementById("hand-min").style.transform =
+        "translateX(-50%) translateY(-100%) rotate(" + minDeg + "deg)";
+      document.getElementById("hand-hour").style.transform =
+        "translateX(-50%) translateY(-100%) rotate(" + hourDeg + "deg)";
+
+      const pad = (n) => String(n).padStart(2, "0");
+      document.getElementById("tm-display").textContent =
+        pad(h) + ":" + pad(m) + ":" + pad(s);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // === CONTROL t_C (slider) ===
+    const tcSlider = document.getElementById("tc-slider");
+    const tcBubble = document.getElementById("tc-bubble");
+    const tcDisplay = document.getElementById("tc-display");
+    const sigmaState = document.getElementById("sigma-state");
+    const evetoState = document.getElementById("eveto-state");
+
+    function updateTC(value) {
+      const v = Number(value) / 100;
+      const txt = v.toFixed(3);
+      tcBubble.textContent = txt;
+      tcDisplay.textContent = txt;
+
+      if (v > 0.3) {
+        sigmaState.innerHTML = '<span class="tag-ok">Q-driven (alta coherencia)</span>';
+        evetoState.innerHTML = '<span class="tag-ok">ΔH &lt; 0 — patrón ordenado</span>';
+      } else if (v < -0.3) {
+        sigmaState.innerHTML = '<span class="tag-bad">φ-driven (fricción alta)</span>';
+        evetoState.innerHTML = '<span class="tag-bad">ΔH &gt; 0 — ruido dominante</span>';
+      } else {
+        sigmaState.innerHTML = '<span class="tag-warn">Zona neutra / transición</span>';
+        evetoState.innerHTML = '<span class="tag-warn">ΔH ≈ 0 — sin veredicto</span>';
+      }
+    }
+
+    tcSlider.addEventListener("input", (e) => updateTC(e.target.value));
+    updateTC(tcSlider.value);
+
+    // === BACKEND /api/query ===
+    const btnSend = document.getElementById("btn-send");
+    const btnClear = document.getElementById("btn-clear");
+    const userText = document.getElementById("user-text");
+    const responseBox = document.getElementById("response-box");
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+
+    function setStatus(mode, text) {
+      statusDot.className = "status-dot " + (mode || "");
+      statusText.textContent = text;
+    }
+
+    btnClear.addEventListener("click", () => {
+      userText.value = "";
+      responseBox.textContent = "La respuesta de la IA aparecerá aquí en formato de texto causal.";
+    });
+
+    btnSend.addEventListener("click", async () => {
+      const content = userText.value.trim();
+      if (!content) {
+        setStatus("warn", "Escribe al menos una frase antes de consultar.");
+        return;
+      }
+
+      btnSend.disabled = true;
+      setStatus("warn", "Enviando consulta a /api/query…");
+
+      try {
+        const res = await fetch("/api/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Eres un analista TCDS. Interpreta el texto del usuario como un sincronograma cualitativo. " +
+                  "Devuelve un diagnóstico breve (3–6 párrafos) que distinga Q, Σ, φ y χ, " +
+                  "marque si el estado es φ-driven, borderline o Q-driven y sugiera una acción concreta de reducción de entropía (ΔH<0)."
+              },
+              { role: "user", content }
+            ]
+          })
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          setStatus("bad", "Error en backend (" + res.status + ")");
+          responseBox.textContent = "Respuesta del backend (error):\n" + txt;
+          return;
+        }
+
+        const data = await res.json();
+        const msg =
+          data.choices?.[0]?.message?.content ??
+          JSON.stringify(data, null, 2);
+
+        responseBox.textContent = msg;
+        setStatus("ok", "Respuesta recibida desde /api/query.");
+      } catch (err) {
+        console.error(err);
+        setStatus("bad", "Falló la conexión con /api/query.");
+        responseBox.textContent = "Error de red o backend.\n" + String(err);
+      } finally {
+        btnSend.disabled = false;
+      }
+    });
+
+    // Chequeo rápido al cargar
+    (async () => {
+      try {
+        const res = await fetch("/api/reports");
+        if (res.ok) {
+          setStatus("ok", "Backend operativo (/api/reports responde 200).");
+        } else {
+          setStatus("warn", "Backend respondió pero con código " + res.status + ".");
+        }
+      } catch {
+        setStatus("bad", "No se pudo contactar /api/reports al iniciar.");
+      }
+    })();
+  </script>
+</body>
+</html>
